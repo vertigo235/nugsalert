@@ -6,7 +6,7 @@ trigger:
     exclude:
       - pull_request
 
-#steps:
+steps:
 #- name: shellcheck
 #  image: koalaman/shellcheck-alpine
 #  pull: always
