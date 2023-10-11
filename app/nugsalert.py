@@ -5,6 +5,7 @@ import logging
 from decouple import config
 import apprise
 import time
+import subprocess
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -17,6 +18,8 @@ FILE_PATH = config("FILE_PATH", "").rstrip('/') + '/'  # Ensure trailing slash
 FILENAME = f"{FILE_PATH}known_ids.json"
 PUSHOVER_TOKEN = config('PUSHOVER_APP_TOKEN', default='')
 PUSHOVER_USER = config('PUSHOVER_USER_KEY', default='')
+DOWNLOAD_SHOW = config('DOWNLOAD_SHOW', default='false').lower() == 'true'
+
 
 def fetch_latest_data():
     logging.info("Fetching latest data from URL...")
@@ -55,6 +58,11 @@ def send_pushover_notification(message, title):
     # Send your notification
     apobj.notify(body=message, title=title)
 
+def download_show(artist_name, show_id):
+    """Downloads a show using the /app/Nugs-DL tool."""
+    cmd = ["/app/Nugs-DL", "-o", f"/downloads/{artist_name}/", f"https://play.nugs.net/release/{show_id}"]
+    subprocess.run(cmd)
+
 def main():
     logging.info("Application started.")
     check_time = config('CHECKTIME', default=None)
@@ -82,6 +90,11 @@ def check_for_updates():
     if new_records:
         logging.info(f"Found {len(new_records)} new records. Sending notification...")
         alert_msg_title = f"New content available on nugs.net!"
+        if DOWNLOAD_SHOW:
+            for record in new_records:
+                artist_name = record['artist']['name']
+                show_id = record['id']
+                download_show(artist_name, show_id)
         digest_message = "\n".join([record['artist']['name'] + ' - ' + record['title'] for record in new_records])
         send_pushover_notification(digest_message, alert_msg_title)
         store_ids(latest_ids)

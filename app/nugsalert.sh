@@ -9,8 +9,8 @@ groupadd -g $APP_GROUP_ID appgroup
 useradd -u $APP_USER_ID -g $APP_GROUP_ID -m appuser
 
 # Set default values for variables
-EMAIL=${NUGS_EMAIL:-"youremail@email.com"}
-PASSWORD=${NUGS_PASSWORD:-"your_password"}
+EMAIL=${NUGS_EMAIL:-""}
+PASSWORD=${NUGS_PASSWORD:-""}
 FORMAT=${NUGS_FORMAT:-4}
 VIDEO_FORMAT=${NUGS_VIDEO_FORMAT:-5}
 OUT_PATH=${NUGS_OUT_PATH:-"/downloads"}
@@ -32,9 +32,9 @@ if [ ! -f "$JSON_FILE" ]; then
     "useFfmpegEnvVar": $USE_FFMPEG_ENV_VAR
 }
 EOF
-  echo "Config file created: $JSON_FILE"
+  echo "nugs.net config file created: $JSON_FILE"
 else
-  echo "Config file already exists: $JSON_FILE"
+  echo "nugs.net config file already exists: $JSON_FILE"
 fi
 
 su appuser -c "python /app/nugsalert.py"
