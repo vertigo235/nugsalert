@@ -37,5 +37,4 @@ else
   echo "Config file already exists: $JSON_FILE"
 fi
 
-# Execute the application with optional arguments
-su appuser -c "python" "/app/nugsalert.py"
+su appuser -c "python /app/nugsalert.py"
