@@ -1,52 +1,58 @@
-# NugsAlert [![Build Status](https://drone.gitea.blubeacon.com/api/badges/vertigo235/nugsalert/status.svg)](https://drone.gitea.blubeacon.com/vertigo235/nugsalert)
-NugsAlert is a Dockerized Python application that fetches the latest audio releases of specific artists from nugs.net and sends notifications for new records via Pushover. It's designed to help fans stay updated on the latest releases without manually checking the site.
+# Nugs Alert and Downloader [![Build Status](https://drone.gitea.blubeacon.com/api/badges/vertigo235/nugsalert/status.svg)](https://drone.gitea.blubeacon.com/vertigo235/nugsalert)
 
-## Features
+This Docker container checks for new content on nugs.net and downloads it if any new content is found.
 
-- Fetches latest data from nugs.net for a specified artist.
-- Notifies users via Pushover for new releases.
-- Can be configured to run once or at specified intervals.
-- Dockerized for easy deployment and scaling.
+## Environment Variables
 
-## Prerequisites
+- **ARTIST_ID**: The ID of the artist you want to check for new content. (e.g. '196') can also be a string of artists (e.g. '196,128')
+- **FILE_PATH**: Path where the known IDs file will be stored. (Default is '/data/')
+- **PUSHOVER_APP_TOKEN**: Your Pushover application token for notifications.
+- **PUSHOVER_USER_KEY**: Your Pushover user key for notifications.
+- **CHECKTIME**: Number of minutes the application should wait before checking for updates again. If not set, the application will only run once.
+- **DOWNLOAD_SHOW**: If set to 'true', the script will attempt to download new shows using the /app/Nugs-DL tool.
+- **NUGS_EMAIL**: Your nugs.net email.
+- **NUGS_PASSWORD**: Your nugs.net password.
+- **NUGS_FORMAT**: The audio format you prefer to download (default is 4).
+- **NUGS_VIDEO_FORMAT**: The video format you prefer to download (default is 5).
+- **NUGS_OUT_PATH**: Path where the downloaded content will be stored (default is '/downloads').
+- **NUGS_TOKEN**: Nugs token if available.
+- **NUGS_USE_FFMPEG_ENV_VAR**: Whether to use ffmpeg environment variable (default is 'true').
 
-- Docker or Podman installed on your system.
-- Pushover account with user and app tokens for notifications.
+## Build and Run
 
-## Building the Docker Image
-
-To construct the Docker image, execute:
-
-```
-docker build -t nugsalert:latest .
-```
-
-## Running the Docker Container
-
-Launch the Docker container using the command below:
+To build the Docker image, navigate to the directory containing the Dockerfile and execute:
 
 ```
-docker run --rm -it -v /path/on/host/config.json:/app/config.json -v /path/on/host:/downloads:rw -e PUID=<YourUserID> -e PGID=<YourGroupID> nugsalert:latest
+docker build -t nugsalert .
 ```
 
-Replace `/path/on/host` with the appropriate directory on your host system where you desire to store data.
+To run the Docker container:
 
-## Configuration
+```
+docker run --rm -it \
+  -v /path/on/host/downloads:/downloads:rw \
+  -v /path/on/host/data:/data:rw \
+  -e ARTIST_ID='196' \
+  -e PUSHOVER_APP_TOKEN='your_token' \
+  -e PUSHOVER_USER_KEY='your_key' \
+  -e NUGS_USERNAME='your nugs.net username' \
+  -e NUGS_PASSWORD='your nugs.net password' \
+  -e DOWNLOAD_SHOW='true' \
+  nugsalert
+```
 
-Several environment variables enable customization of the application's behavior:
+Replace `/path/on/host/` with your desired directory on the host system.
 
-- `PUID`: Specify the user ID the application should run under in the container. Defaults to 1000.
-- `PGID`: Define the group ID the application should run under inside the container. Defaults to 1000.
-- `ARTIST_ID`: Artist ID from nugs.net for which you want to fetch the latest releases. If not specified, it defaults to `196` (e.g., a specific band).
-- `FILE_PATH`: Path where the application will store a JSON file with known record IDs. This allows the application to determine new records on subsequent runs. Defaults to `/data/`.
-- `PUSHOVER_APP_TOKEN`: Your Pushover application token, necessary to send notifications.
-- `PUSHOVER_USER_KEY`: Your Pushover user key, which determines where the notifications will be sent.
-- `CHECKTIME`: If specified, the script will run continuously, checking for new data every `CHECKTIME` minutes. If not set, the script will execute once and exit.
+## Notes
 
-## Contributing
+Ensure you set the correct environment variables as per your requirements.
 
-We appreciate and welcome any contributions. If you have suggestions, enhancements, or encounter issues, please open an issue or submit a pull request.
+## Docker Image
+You can also pull the Docker image for this project directly from Docker Hub:
+```
+docker pull docker.io/vertigo235/nugsalert
+```
 
-## License
+## Credits
+This docker uses the [Nugs-Downloader](https://github.com/Sorrow446/Nugs-Downloader) project by [Sorrow446](https://github.com/Sorrow446). A huge thanks to them for their contribution to the community!
 
-This project is released under the open-source [MIT License](LICENSE).
