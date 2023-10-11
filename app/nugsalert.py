@@ -59,9 +59,10 @@ def send_pushover_notification(message, title):
     apobj.notify(body=message, title=title)
 
 def download_show(artist_name, show_id):
-    """Downloads a show using the /app/Nugs-DL tool."""
+    """Downloads a show using the /app/Nugs-DL tool and returns its exit code."""
     cmd = ["/app/Nugs-DL", "-o", f"/downloads/{artist_name}/", f"https://play.nugs.net/release/{show_id}"]
-    subprocess.run(cmd)
+    result = subprocess.run(cmd)
+    return result.returncode
 
 def main():
     logging.info("Application started.")
@@ -94,7 +95,14 @@ def check_for_updates():
             for record in new_records:
                 artist_name = record['artist']['name']
                 show_id = record['id']
-                download_show(artist_name, show_id)
+                exit_code = download_show(artist_name, show_id)
+                
+                # Check exit code and perform necessary actions
+                if exit_code == 0:
+                    logging.info(f"Successfully downloaded show with ID {show_id}.")
+                else:
+                    logging.warning(f"Failed to download show with ID {show_id}. Exit code: {exit_code}.")
+                    
         digest_message = "\n".join([record['artist']['name'] + ' - ' + record['title'] for record in new_records])
         send_pushover_notification(digest_message, alert_msg_title)
         store_ids(latest_ids)
