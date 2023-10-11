@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg
+
+# Caches and logs
+log/
+*.log
+*.pkl
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Virtual Environment
+venv/
+*.venv
+venv.bak/
+ENV/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings
+.vscode/
+
+# Docker files
+known_ids.json
+
+# Other
+*.swp
+*.swo
+*.swn
+*~
+
+# IDE-specific
+.idea/
+*.iml
+
+# Environment secrets
+config.json
+*.env
+
+# dist and build
+build/
+dist/
