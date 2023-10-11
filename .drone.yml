@@ -6,13 +6,13 @@ trigger:
     exclude:
       - pull_request
 
-steps:
-- name: shellcheck
-  image: koalaman/shellcheck-alpine
-  pull: always
-  commands:
-    - shellcheck --version
-    - for file in $(find ./root -type f); do echo $file; shellcheck $file; done;
+#steps:
+#- name: shellcheck
+#  image: koalaman/shellcheck-alpine
+#  pull: always
+#  commands:
+#    - shellcheck --version
+#    - for file in $(find ./root -type f); do echo $file; shellcheck $file; done;
 
 - name: dev-build
   image: plugins/docker

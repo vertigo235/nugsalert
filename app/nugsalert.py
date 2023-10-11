@@ -12,27 +12,33 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 URL_TEMPLATE = "https://catalog.nugs.net/api/v1/releases/recent?limit=20&offset=0&artistIds={}&contentType=audio"
 ARTIST_ID = config('ARTIST_ID', default='')
 URL = URL_TEMPLATE.format(ARTIST_ID)
-FILE_PATH = "known_ids.json"
+FILE_PATH = config("FILE_PATH", "").rstrip('/') + '/'  # Ensure trailing slash
+FILENAME = f"{FILE_PATH}known_ids.json"
 PUSHOVER_TOKEN = config('PUSHOVER_APP_TOKEN', default='')
 PUSHOVER_USER = config('PUSHOVER_USER_KEY', default='')
 
 def fetch_latest_data():
     logging.info("Fetching latest data from URL...")
-    response = requests.get(URL)
-    return response.json()['items']
+    try:
+        response = requests.get(URL)
+        response.raise_for_status()  # Raise exception for bad responses
+        return response.json()['items']
+    except requests.RequestException as error:
+        logging.error(f"Failed to fetch data due to: {error}")
+        return []
 
 def get_stored_ids():
-    if os.path.exists(FILE_PATH):
-        with open(FILE_PATH, 'r') as file:
+    if os.path.exists(FILENAME):
+        with open(FILENAME, 'r') as file:
             return json.load(file)
     else:
-        logging.warning(f"File {FILE_PATH} not found. Creating a new one...")
-        with open(FILE_PATH, 'w') as file:
+        logging.warning(f"File {FILENAME} not found. Creating a new one...")
+        with open(FILENAME, 'w') as file:
             json.dump([], file)
         return []
 
 def store_ids(latest_ids):
-    with open(FILE_PATH, 'w') as file:
+    with open(FILENAME, 'w') as file:
         json.dump(latest_ids, file)
 
 def send_pushover_notification(message, title):
@@ -40,7 +46,6 @@ def send_pushover_notification(message, title):
     apobj = apprise.Apprise()
 
     # Define your Pushover server using the correct URL format:
-    # pover://<user_token>@<app_token>
     url = f"pover://{PUSHOVER_USER}@{PUSHOVER_TOKEN}"
 
     # Add your notification service to apprise
