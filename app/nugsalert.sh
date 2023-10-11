@@ -16,7 +16,7 @@ VIDEO_FORMAT=${VIDEO_FORMAT:-5}
 OUT_PATH=${OUT_PATH:-"/downloads"}
 TOKEN=${TOKEN:-}
 USE_FFMPEG_ENV_VAR=${USE_FFMPEG_ENV_VAR:-true}
-JSON_FILE="/config/config.json"
+JSON_FILE="/app/config.json"
 
 # Check if the config file already exists
 if [ ! -f "$JSON_FILE" ]; then

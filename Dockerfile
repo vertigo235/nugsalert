@@ -25,7 +25,6 @@ ENV FILE_PATH=/data/
 
 # Create a directory for downloads and set permissions
 RUN mkdir /downloads && chmod 777 /downloads
-RUN mkdir /config && chmod 777 /config
 RUN mkdir /data && chmod 777 /data
 
 CMD ["/app/nugsalert.sh"]
