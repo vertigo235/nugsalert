@@ -47,3 +47,6 @@ Replace `/path/on/host/` with your desired directory on the host system.
 
 Ensure you set the correct environment variables as per your requirements.
 
+## Credits
+This docker uses the [Nugs-Downloader](https://github.com/Sorrow446/Nugs-Downloader) project by [Sorrow446](https://github.com/Sorrow446). A huge thanks to them for their contribution to the community!
+
