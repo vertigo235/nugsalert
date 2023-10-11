@@ -1,5 +1,4 @@
-# NugsAlert
-
+# NugsAlert [![Build Status](https://drone.gitea.blubeacon.com/api/badges/vertigo235/nugsalert/status.svg)](https://drone.gitea.blubeacon.com/vertigo235/nugsalert)
 NugsAlert is a Dockerized Python application that fetches the latest audio releases of specific artists from nugs.net and sends notifications for new records via Pushover. It's designed to help fans stay updated on the latest releases without manually checking the site.
 
 ## Features

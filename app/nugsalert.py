@@ -102,7 +102,11 @@ def check_for_updates():
                     logging.info(f"Successfully downloaded show with ID {show_id}.")
                 else:
                     logging.warning(f"Failed to download show with ID {show_id}. Exit code: {exit_code}.")
-                    
+                    # Sending a notification about the failure
+                    failure_title = "Show Download Failure!"
+                    failure_message = f"Failed to download show '{record['title']}' with ID {show_id}. Exit code: {exit_code}."
+                    send_pushover_notification(failure_message, failure_title)
+
         digest_message = "\n".join([record['artist']['name'] + ' - ' + record['title'] for record in new_records])
         send_pushover_notification(digest_message, alert_msg_title)
         store_ids(latest_ids)
