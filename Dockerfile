@@ -26,5 +26,4 @@ RUN pip install -r /app/requirements.txt
 # Set the FILE_PATH environment variable
 ENV FILE_PATH=/data/
 
-# Specify the entrypoint
-ENTRYPOINT ["python", "/app/nugsalert.py"]
+CMD ["python", "/app/nugsalert.py"]
