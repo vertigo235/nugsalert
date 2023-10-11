@@ -47,6 +47,12 @@ Replace `/path/on/host/` with your desired directory on the host system.
 
 Ensure you set the correct environment variables as per your requirements.
 
+## Docker Image
+You can also pull the Docker image for this project directly from Docker Hub:
+```
+docker pull docker.io/vertigo235/nugsalert
+```
+
 ## Credits
 This docker uses the [Nugs-Downloader](https://github.com/Sorrow446/Nugs-Downloader) project by [Sorrow446](https://github.com/Sorrow446). A huge thanks to them for their contribution to the community!
 
