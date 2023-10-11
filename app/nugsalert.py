@@ -4,6 +4,7 @@ import json
 import logging
 from decouple import config
 import apprise
+import time
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -56,6 +57,22 @@ def send_pushover_notification(message, title):
 
 def main():
     logging.info("Application started.")
+    check_time = config('CHECKTIME', default=None)
+
+    # If CHECKTIME is not defined or not a number, run the script once
+    if not check_time or not check_time.isdigit():
+        check_for_updates()
+        return
+
+    # If CHECKTIME is defined and a number, run the script every {n} minutes
+    delay = int(check_time) * 60  # Convert minutes to seconds
+
+    while True:
+        check_for_updates()
+        logging.info(f"Sleeping for {check_time} minutes...")
+        time.sleep(delay)
+
+def check_for_updates():
     latest_data = fetch_latest_data()
     latest_ids = [item['id'] for item in latest_data]
     stored_ids = get_stored_ids()
