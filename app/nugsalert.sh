@@ -5,15 +5,16 @@ APP_USER_ID=${PUID:-1000}
 APP_GROUP_ID=${PGID:-1000}
 
 # Create a non-root user and group with customizable IDs
-# Check if the group already exists
-if ! getent group appgroup > /dev/null; then
+# Check if the group or GID already exists
+if ! getent group appgroup > /dev/null && ! getent group $APP_GROUP_ID > /dev/null; then
     groupadd -g $APP_GROUP_ID appgroup
 fi
 
-# Check if the user already exists
-if ! getent passwd appuser > /dev/null; then
+# Check if the user or UID already exists
+if ! getent passwd appuser > /dev/null && ! getent passwd $APP_USER_ID > /dev/null; then
     useradd -u $APP_USER_ID -g $APP_GROUP_ID -m appuser
 fi
+
 # Set default values for variables
 EMAIL=${NUGS_EMAIL:-""}
 PASSWORD=${NUGS_PASSWORD:-""}
