@@ -43,15 +43,48 @@ docker run --rm -it \
 
 Replace `/path/on/host/` with your desired directory on the host system.
 
-## Notes
-
-Ensure you set the correct environment variables as per your requirements.
-
 ## Docker Image
 You can also pull the Docker image for this project directly from Docker Hub:
 ```
 docker pull docker.io/vertigo235/nugsalert
 ```
+
+## Docker Compose
+
+For a more streamlined deployment, especially when running multiple containers, you can use Docker Compose. Below is a sample `docker-compose.yml` configuration for `nugsalert`:
+
+```yaml
+version: '3.8'
+
+services:
+  nugsalert:
+    image: vertigo235/nugsalert:latest
+    container_name: nugsalert
+    restart: unless-stopped
+    environment:
+      NUGS_EMAIL: your_email@example.com
+      NUGS_PASSWORD: 'your_password'
+      CHECKTIME: "5"
+      PUSHOVER_APP_TOKEN: your_pushover_app_token
+      PUSHOVER_USER_KEY: your_pushover_user_key
+      ARTIST_ID: "101,128,196"
+      DOWNLOAD_SHOW: "true"
+      PUID: "1000"
+      PGID: "100"
+      TZ: "US/Eastern"
+    volumes:
+      - /path_on_host/to/data:/data
+      - /path_on_host/to/downloads:/downloads
+
+```
+
+To deploy using Docker Compose, navigate to the directory containing your `docker-compose.yml` and run:
+
+```bash
+docker-compose up -d
+```
+
+Remember to replace placeholder values like `your_email@example.com` with your actual data. If your password or any other values have special characters, ensure they're enclosed in single quotes for proper parsing.
 
 ## Credits
 This docker uses the [Nugs-Downloader](https://github.com/Sorrow446/Nugs-Downloader) project by [Sorrow446](https://github.com/Sorrow446). A huge thanks to them for their contribution to the community!
