@@ -14,10 +14,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 URL_TEMPLATE = "https://catalog.nugs.net/api/v1/releases/recent?limit=20&offset=0&artistIds={}&contentType=audio"
 ARTIST_ID = config('ARTIST_ID', default='')
 URL = URL_TEMPLATE.format(ARTIST_ID)
-FILE_PATH = config("FILE_PATH", "").rstrip('/') + '/'  # Ensure trailing slash
+FILE_PATH = config("FILE_PATH", "").rstrip('/')
+if FILE_PATH:
+    FILE_PATH += '/'
 FILENAME = f"{FILE_PATH}known_ids.json"
-PUSHOVER_TOKEN = config('PUSHOVER_APP_TOKEN', default='')
-PUSHOVER_USER = config('PUSHOVER_USER_KEY', default='')
+PUSHOVER_TOKEN = config('PUSHOVER_APP_TOKEN', default=None)
+PUSHOVER_USER = config('PUSHOVER_USER_KEY', default=None)
 DOWNLOAD_SHOW = config('DOWNLOAD_SHOW', default='false').lower() == 'true'
 
 
@@ -89,8 +91,6 @@ def check_for_updates():
     new_records = [item for item in latest_data if item['id'] not in stored_ids]
 
     if new_records:
-        logging.info(f"Found {len(new_records)} new records. Sending notification...")
-        alert_msg_title = f"New content available on nugs.net!"
         if DOWNLOAD_SHOW:
             for record in new_records:
                 artist_name = record['artist']['name']
@@ -108,7 +108,13 @@ def check_for_updates():
                     send_pushover_notification(failure_message, failure_title)
 
         digest_message = "\n".join([record['artist']['name'] + ' - ' + record['title'] for record in new_records])
-        send_pushover_notification(digest_message, alert_msg_title)
+        alert_msg_title = f"New content available on nugs.net!"
+        if PUSHOVER_TOKEN:
+            logging.info(f"Found {len(new_records)} new records. Sending notification...")
+            send_pushover_notification(digest_message, alert_msg_title)
+        else:
+            logging.info(f"Found {len(new_records)} new records. Pushover credntials not defined so no notification was sent...")
+        
         store_ids(latest_ids)
     else:
         logging.info("No new records found.")

@@ -1,18 +1,23 @@
 #!/bin/bash
 
 # Define default user and group IDs
-APP_USER_ID=${PUID:-1000}
-APP_GROUP_ID=${PGID:-1000}
+APP_USER_ID=${PUID:-}
+APP_GROUP_ID=${PGID:-}
 
-# Create a non-root user and group with customizable IDs
-# Check if the group or GID already exists
-if ! getent group appgroup > /dev/null && ! getent group $APP_GROUP_ID > /dev/null; then
-    groupadd -g $APP_GROUP_ID appgroup
-fi
+# Only create user and group if PUID and PGID are set
+if [ -n "$APP_USER_ID" ] && [ -n "$APP_GROUP_ID" ]; then
+    # Check if the group or GID already exists
+    if ! getent group appgroup > /dev/null && ! getent group $APP_GROUP_ID > /dev/null; then
+        groupadd -g $APP_GROUP_ID appgroup
+    fi
 
-# Check if the user or UID already exists
-if ! getent passwd appuser > /dev/null && ! getent passwd $APP_USER_ID > /dev/null; then
-    useradd -u $APP_USER_ID -g $APP_GROUP_ID -m appuser
+    # Check if the user or UID already exists
+    if ! getent passwd appuser > /dev/null && ! getent passwd $APP_USER_ID > /dev/null; then
+        useradd -u $APP_USER_ID -g $APP_GROUP_ID -m appuser
+    fi
+
+    # Log the UID and GID that should be set
+    echo "Setting UID to: $APP_USER_ID, GID to: $APP_GROUP_ID"
 fi
 
 # Set default values for variables
@@ -44,4 +49,10 @@ else
   echo "nugs.net config file already exists: $JSON_FILE"
 fi
 
-su appuser -c "python /app/nugsalert.py"
+# Execute Python script conditionally
+if [ -n "$APP_USER_ID" ] && [ -n "$APP_GROUP_ID" ]; then
+    su appuser -c "echo 'Executing as UID:' \$(id -u) ', GID:' \$(id -g); python /app/nugsalert.py"
+else
+    echo 'Executing as current user'
+    python /app/nugsalert.py
+fi
