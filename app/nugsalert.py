@@ -62,7 +62,8 @@ def send_pushover_notification(message, title):
 
 def download_show(artist_name, show_id):
     """Downloads a show using the /app/Nugs-DL tool and returns its exit code."""
-    cmd = ["/app/Nugs-DL", "-o", f"/downloads/{artist_name}/", f"https://play.nugs.net/release/{show_id}"]
+    formatted_artist_name = artist_name.replace('.', '_') # Remove . from folder name to prevent isse with CIFS share and folders ending with "." (eg. moe.)
+    cmd = ["/app/Nugs-DL", "-o", f"/downloads/{formatted_artist_name}/", f"https://play.nugs.net/release/{show_id}"]
     result = subprocess.run(cmd)
     return result.returncode
 
