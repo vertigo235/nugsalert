@@ -15,6 +15,7 @@ URL_TEMPLATE = f"https://catalog.nugs.net/api/v1/releases/recent?limit={LIMIT}&o
 ARTIST_ID = config('ARTIST_ID', default='')
 LIMIT = config('LIMIT', default=20, cast=int)
 URL = URL_TEMPLATE.format(ARTIST_ID)
+logging.info('URL: ' + URL)
 FILE_PATH = config("FILE_PATH", "").rstrip('/')
 if FILE_PATH:
     FILE_PATH += '/'
