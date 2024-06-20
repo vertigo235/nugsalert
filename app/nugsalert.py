@@ -11,8 +11,9 @@ import subprocess
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Configurable values
-URL_TEMPLATE = "https://catalog.nugs.net/api/v1/releases/recent?limit=20&offset=0&artistIds={}&contentType=audio"
+URL_TEMPLATE = f"https://catalog.nugs.net/api/v1/releases/recent?limit={LIMIT}&offset=0&artistIds={ARTIST_ID}&contentType=audio"
 ARTIST_ID = config('ARTIST_ID', default='')
+LIMIT = config('LIMIT', default=20, cast=int)
 URL = URL_TEMPLATE.format(ARTIST_ID)
 FILE_PATH = config("FILE_PATH", "").rstrip('/')
 if FILE_PATH:
@@ -62,7 +63,8 @@ def send_pushover_notification(message, title):
 
 def download_show(artist_name, show_id):
     """Downloads a show using the /app/Nugs-DL tool and returns its exit code."""
-    cmd = ["/app/Nugs-DL", "-o", f"/downloads/{artist_name}/", f"https://play.nugs.net/release/{show_id}"]
+    formatted_artist_name = artist_name.replace('.', '_') # Remove . from folder name to prevent isse with CIFS share and folders ending with "." (eg. moe.)
+    cmd = ["/app/Nugs-DL", "-o", f"/downloads/{formatted_artist_name}/", f"https://play.nugs.net/release/{show_id}"]
     result = subprocess.run(cmd)
     return result.returncode
 
