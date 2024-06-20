@@ -13,6 +13,8 @@ FROM python:3.12-slim-bullseye
 WORKDIR /app
 COPY --from=build /build/Nugs-DL /app/Nugs-DL
 
+RUN apt update && apt install -y --no-install-recommends ffmpeg
+
 # Copy the contents of the /app folder into the container
 COPY ./app /app
 RUN chmod +x /app/nugsalert.sh
