@@ -1,5 +1,5 @@
 # Build Nugs-Dl
-FROM golang:1.21.3-bullseye as build
+FROM golang:1.22.4-bullseye as build
 
 WORKDIR /build
 
