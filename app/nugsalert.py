@@ -11,8 +11,9 @@ import subprocess
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Configurable values
-URL_TEMPLATE = "https://catalog.nugs.net/api/v1/releases/recent?limit=20&offset=0&artistIds={}&contentType=audio"
+URL_TEMPLATE = f"https://catalog.nugs.net/api/v1/releases/recent?limit={LIMIT}&offset=0&artistIds={ARTIST_ID}&contentType=audio"
 ARTIST_ID = config('ARTIST_ID', default='')
+LIMIT = config('LIMIT', default=20, cast=int)
 URL = URL_TEMPLATE.format(ARTIST_ID)
 FILE_PATH = config("FILE_PATH", "").rstrip('/')
 if FILE_PATH:
