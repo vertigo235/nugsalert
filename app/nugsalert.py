@@ -26,7 +26,10 @@ AUDIO_FILENAME = f"{FILE_PATH}known_ids.json"
 VIDEO_FILENAME = f"{FILE_PATH}known_video_ids.json"
 PUSHOVER_TOKEN = config('PUSHOVER_APP_TOKEN', default=None)
 PUSHOVER_USER = config('PUSHOVER_USER_KEY', default=None)
-DOWNLOAD_SHOW = config('DOWNLOAD_SHOW', default='false').lower() == 'true'
+DOWNLOAD_AUDIO = config('DOWNLOAD_AUDIO', default='false').lower() == 'true'
+DOWNLOAD_VIDEO = config('DOWNLOAD_VIDEO', default='false').lower() == 'true'
+AUDIO_DOWNLOAD_PATH = config('AUDIO_DOWNLOAD_PATH', default='/downloads/audio/')
+VIDEO_DOWNLOAD_PATH = config('VIDEO_DOWNLOAD_PATH', default='/downloads/video/')
 
 def fetch_latest_data(url):
     logging.info(f"Fetching latest data from URL: {url}")
@@ -68,7 +71,8 @@ def send_pushover_notification(message, title):
 def download_show(artist_name, show_id, force_video=False):
     """Downloads a show using the /app/Nugs-DL tool and returns its exit code."""
     formatted_artist_name = artist_name.replace('.', '_') # Remove . from folder name to prevent issue with CIFS share and folders ending with "." (eg. moe.)
-    cmd = ["/app/Nugs-DL", "-o", f"/downloads/{formatted_artist_name}/"]
+    download_path = VIDEO_DOWNLOAD_PATH if force_video else AUDIO_DOWNLOAD_PATH
+    cmd = ["/app/Nugs-DL", "-o", f"{download_path}/{formatted_artist_name}/"]
     if force_video:
         cmd.append("--force-video")
     cmd.append(f"https://play.nugs.net/release/{show_id}")
@@ -100,8 +104,16 @@ def check_for_updates():
 
     new_audio_records = [item for item in latest_audio_data if item['id'] not in stored_audio_ids]
 
+    # Process video content
+    latest_video_data = fetch_latest_data(VIDEO_URL)
+    latest_video_ids = [item['id'] for item in latest_video_data]
+    stored_video_ids = get_stored_ids(VIDEO_FILENAME)
+
+    new_video_records = [item for item in latest_video_data if item['id'] not in stored_video_ids]
+
+    # Process new audio records
     if new_audio_records:
-        if DOWNLOAD_SHOW:
+        if DOWNLOAD_AUDIO:
             for record in new_audio_records:
                 artist_name = record['artist']['name']
                 show_id = record['id']
@@ -124,20 +136,14 @@ def check_for_updates():
             send_pushover_notification(audio_digest_message, audio_alert_msg_title)
         else:
             logging.info(f"Found {len(new_audio_records)} new audio records. Pushover credentials not defined so no notification was sent...")
-        
+
         store_ids(latest_audio_ids, AUDIO_FILENAME)
     else:
         logging.info("No new audio records found.")
 
-    # Process video content
-    latest_video_data = fetch_latest_data(VIDEO_URL)
-    latest_video_ids = [item['id'] for item in latest_video_data]
-    stored_video_ids = get_stored_ids(VIDEO_FILENAME)
-
-    new_video_records = [item for item in latest_video_data if item['id'] not in stored_video_ids]
-
+    # Process new video records
     if new_video_records:
-        if DOWNLOAD_SHOW:
+        if DOWNLOAD_VIDEO:
             for record in new_video_records:
                 artist_name = record['artist']['name']
                 show_id = record['id']
@@ -160,7 +166,7 @@ def check_for_updates():
             send_pushover_notification(video_digest_message, video_alert_msg_title)
         else:
             logging.info(f"Found {len(new_video_records)} new video records. Pushover credentials not defined so no notification was sent...")
-        
+
         store_ids(latest_video_ids, VIDEO_FILENAME)
     else:
         logging.info("No new video records found.")
