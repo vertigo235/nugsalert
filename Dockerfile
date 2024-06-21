@@ -1,5 +1,5 @@
 # Build Nugs-Dl
-FROM golang:1.21.3-bullseye as build
+FROM golang:1.22.4-bullseye as build
 
 WORKDIR /build
 
@@ -12,6 +12,8 @@ RUN apt update && apt install -y --no-install-recommends git ffmpeg && \
 FROM python:3.12-slim-bullseye
 WORKDIR /app
 COPY --from=build /build/Nugs-DL /app/Nugs-DL
+
+RUN apt update && apt install -y --no-install-recommends ffmpeg
 
 # Copy the contents of the /app folder into the container
 COPY ./app /app
