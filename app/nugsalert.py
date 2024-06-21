@@ -78,6 +78,7 @@ def download_show(artist_name, show_id, force_video=False):
     if force_video:
         cmd.append("--force-video")
     cmd.append(f"https://play.nugs.net/release/{show_id}")
+    logging.info(f"Nugs-DL command: {cmd}")
     result = subprocess.run(cmd)
     return result.returncode
 
