@@ -70,11 +70,15 @@ def send_pushover_notification(message, title):
     # Send your notification
     apobj.notify(body=message, title=title)
 
-def download_show(artist_name, show_id, force_video=False):
+def download_show(artist_name, show_id, show_title=None, force_video=False):
     """Downloads a show using the /app/Nugs-DL tool and returns its exit code."""
     formatted_artist_name = artist_name.replace('.', '_') # Remove . from folder name to prevent issue with CIFS share and folders ending with "." (eg. moe.)
-    download_path = VIDEO_DOWNLOAD_PATH if force_video else AUDIO_DOWNLOAD_PATH
-    cmd = ["/app/Nugs-DL", "-o", f"{download_path}/{formatted_artist_name}/"]
+    if force_video and show_title:
+        formatted_show_title = show_title.replace('-', '_').replace('.', '_')  # Replace dashes and periods with underscores
+        download_path = f"{VIDEO_DOWNLOAD_PATH}/{formatted_artist_name}/{formatted_show_title}"
+    else:
+        download_path = f"{AUDIO_DOWNLOAD_PATH}/{formatted_artist_name}"
+    cmd = ["/app/Nugs-DL", "-o", f"{download_path}/"]
     if force_video:
         cmd.append("--force-video")
     cmd.append(f"https://play.nugs.net/release/{show_id}")
@@ -150,7 +154,8 @@ def check_for_updates():
             for record in new_video_records:
                 artist_name = record['artist']['name']
                 show_id = record['id']
-                exit_code = download_show(artist_name, show_id, force_video=True)
+                show_title = record['title']  # 
+                exit_code = download_show(artist_name, show_id, show_title, force_video=True)
 
                 # Check exit code and perform necessary actions
                 if exit_code == 0:
