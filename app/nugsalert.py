@@ -28,8 +28,8 @@ PUSHOVER_TOKEN = config('PUSHOVER_APP_TOKEN', default=None)
 PUSHOVER_USER = config('PUSHOVER_USER_KEY', default=None)
 DOWNLOAD_AUDIO = config('DOWNLOAD_AUDIO', default='false').lower() == 'true'
 DOWNLOAD_VIDEO = config('DOWNLOAD_VIDEO', default='false').lower() == 'true'
-AUDIO_DOWNLOAD_PATH = config('AUDIO_DOWNLOAD_PATH', default='/downloads/audio/')
-VIDEO_DOWNLOAD_PATH = config('VIDEO_DOWNLOAD_PATH', default='/downloads/video/')
+AUDIO_DOWNLOAD_PATH = config('AUDIO_DOWNLOAD_PATH', default='/downloads/audio').rstrip('/')
+VIDEO_DOWNLOAD_PATH = config('VIDEO_DOWNLOAD_PATH', default='/downloads/video').rstrip('/')
 
 def fetch_latest_data(url):
     logging.info(f"Fetching latest data from URL: {url}")
