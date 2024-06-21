@@ -52,8 +52,10 @@ def get_stored_ids(filename):
         return []
 
 def store_ids(latest_ids, filename):
+    stored_ids = get_stored_ids(filename)
+    all_ids = list(set(stored_ids + latest_ids))  # Merge and remove duplicates
     with open(filename, 'w') as file:
-        json.dump(latest_ids, file)
+        json.dump(all_ids, file)
 
 def send_pushover_notification(message, title):
     # Create an Apprise instance
