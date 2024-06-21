@@ -12,41 +12,44 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # Configurable values
 ARTIST_ID = config('ARTIST_ID', default='')
-LIMIT = config('LIMIT', default=20, cast=int)
-URL_TEMPLATE = f"https://catalog.nugs.net/api/v1/releases/recent?limit={LIMIT}&offset=0&artistIds={ARTIST_ID}&contentType=audio"
-URL = URL_TEMPLATE
-logging.info('URL: ' + URL)
+LIMIT = config('LIMIT', default=50, cast=int)
+AUDIO_URL_TEMPLATE = f"https://catalog.nugs.net/api/v1/releases/recent?limit={LIMIT}&offset=0&artistIds={ARTIST_ID}&contentType=audio"
+VIDEO_URL_TEMPLATE = f"https://catalog.nugs.net/api/v1/releases/recent?limit={LIMIT}&offset=0&artistIds={ARTIST_ID}&contentType=video"
+AUDIO_URL = AUDIO_URL_TEMPLATE
+VIDEO_URL = VIDEO_URL_TEMPLATE
+logging.info('AUDIO_URL: ' + AUDIO_URL)
+logging.info('VIDEO_URL: ' + VIDEO_URL)
 FILE_PATH = config("FILE_PATH", "").rstrip('/')
 if FILE_PATH:
     FILE_PATH += '/'
-FILENAME = f"{FILE_PATH}known_ids.json"
+AUDIO_FILENAME = f"{FILE_PATH}known_ids.json"
+VIDEO_FILENAME = f"{FILE_PATH}known_video_ids.json"
 PUSHOVER_TOKEN = config('PUSHOVER_APP_TOKEN', default=None)
 PUSHOVER_USER = config('PUSHOVER_USER_KEY', default=None)
 DOWNLOAD_SHOW = config('DOWNLOAD_SHOW', default='false').lower() == 'true'
 
-
-def fetch_latest_data():
-    logging.info("Fetching latest data from URL...")
+def fetch_latest_data(url):
+    logging.info(f"Fetching latest data from URL: {url}")
     try:
-        response = requests.get(URL)
+        response = requests.get(url)
         response.raise_for_status()  # Raise exception for bad responses
         return response.json()['items']
     except requests.RequestException as error:
         logging.error(f"Failed to fetch data due to: {error}")
         return []
 
-def get_stored_ids():
-    if os.path.exists(FILENAME):
-        with open(FILENAME, 'r') as file:
+def get_stored_ids(filename):
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
             return json.load(file)
     else:
-        logging.warning(f"File {FILENAME} not found. Creating a new one...")
-        with open(FILENAME, 'w') as file:
+        logging.warning(f"File {filename} not found. Creating a new one...")
+        with open(filename, 'w') as file:
             json.dump([], file)
         return []
 
-def store_ids(latest_ids):
-    with open(FILENAME, 'w') as file:
+def store_ids(latest_ids, filename):
+    with open(filename, 'w') as file:
         json.dump(latest_ids, file)
 
 def send_pushover_notification(message, title):
@@ -62,10 +65,13 @@ def send_pushover_notification(message, title):
     # Send your notification
     apobj.notify(body=message, title=title)
 
-def download_show(artist_name, show_id):
+def download_show(artist_name, show_id, force_video=False):
     """Downloads a show using the /app/Nugs-DL tool and returns its exit code."""
-    formatted_artist_name = artist_name.replace('.', '_') # Remove . from folder name to prevent isse with CIFS share and folders ending with "." (eg. moe.)
-    cmd = ["/app/Nugs-DL", "-o", f"/downloads/{formatted_artist_name}/", f"https://play.nugs.net/release/{show_id}"]
+    formatted_artist_name = artist_name.replace('.', '_') # Remove . from folder name to prevent issue with CIFS share and folders ending with "." (eg. moe.)
+    cmd = ["/app/Nugs-DL", "-o", f"/downloads/{formatted_artist_name}/"]
+    if force_video:
+        cmd.append("--force-video")
+    cmd.append(f"https://play.nugs.net/release/{show_id}")
     result = subprocess.run(cmd)
     return result.returncode
 
@@ -87,40 +93,77 @@ def main():
         time.sleep(delay)
 
 def check_for_updates():
-    latest_data = fetch_latest_data()
-    latest_ids = [item['id'] for item in latest_data]
-    stored_ids = get_stored_ids()
+    # Process audio content
+    latest_audio_data = fetch_latest_data(AUDIO_URL)
+    latest_audio_ids = [item['id'] for item in latest_audio_data]
+    stored_audio_ids = get_stored_ids(AUDIO_FILENAME)
 
-    new_records = [item for item in latest_data if item['id'] not in stored_ids]
+    new_audio_records = [item for item in latest_audio_data if item['id'] not in stored_audio_ids]
 
-    if new_records:
+    if new_audio_records:
         if DOWNLOAD_SHOW:
-            for record in new_records:
+            for record in new_audio_records:
                 artist_name = record['artist']['name']
                 show_id = record['id']
                 exit_code = download_show(artist_name, show_id)
-                
+
                 # Check exit code and perform necessary actions
                 if exit_code == 0:
-                    logging.info(f"Successfully downloaded show with ID {show_id}.")
+                    logging.info(f"Successfully downloaded audio show with ID {show_id}.")
                 else:
-                    logging.warning(f"Failed to download show with ID {show_id}. Exit code: {exit_code}.")
+                    logging.warning(f"Failed to download audio show with ID {show_id}. Exit code: {exit_code}.")
                     # Sending a notification about the failure
-                    failure_title = "Show Download Failure!"
-                    failure_message = f"Failed to download show '{record['title']}' with ID {show_id}. Exit code: {exit_code}."
+                    failure_title = "Audio Show Download Failure!"
+                    failure_message = f"Failed to download audio show '{record['title']}' with ID {show_id}. Exit code: {exit_code}."
                     send_pushover_notification(failure_message, failure_title)
 
-        digest_message = "\n".join([record['artist']['name'] + ' - ' + record['title'] for record in new_records])
-        alert_msg_title = f"New content available on nugs.net!"
+        audio_digest_message = "\n".join([record['artist']['name'] + ' - ' + record['title'] for record in new_audio_records])
+        audio_alert_msg_title = f"New audio content available on nugs.net!"
         if PUSHOVER_TOKEN:
-            logging.info(f"Found {len(new_records)} new records. Sending notification...")
-            send_pushover_notification(digest_message, alert_msg_title)
+            logging.info(f"Found {len(new_audio_records)} new audio records. Sending notification...")
+            send_pushover_notification(audio_digest_message, audio_alert_msg_title)
         else:
-            logging.info(f"Found {len(new_records)} new records. Pushover credntials not defined so no notification was sent...")
+            logging.info(f"Found {len(new_audio_records)} new audio records. Pushover credentials not defined so no notification was sent...")
         
-        store_ids(latest_ids)
+        store_ids(latest_audio_ids, AUDIO_FILENAME)
     else:
-        logging.info("No new records found.")
+        logging.info("No new audio records found.")
+
+    # Process video content
+    latest_video_data = fetch_latest_data(VIDEO_URL)
+    latest_video_ids = [item['id'] for item in latest_video_data]
+    stored_video_ids = get_stored_ids(VIDEO_FILENAME)
+
+    new_video_records = [item for item in latest_video_data if item['id'] not in stored_video_ids]
+
+    if new_video_records:
+        if DOWNLOAD_SHOW:
+            for record in new_video_records:
+                artist_name = record['artist']['name']
+                show_id = record['id']
+                exit_code = download_show(artist_name, show_id, force_video=True)
+
+                # Check exit code and perform necessary actions
+                if exit_code == 0:
+                    logging.info(f"Successfully downloaded video show with ID {show_id}.")
+                else:
+                    logging.warning(f"Failed to download video show with ID {show_id}. Exit code: {exit_code}.")
+                    # Sending a notification about the failure
+                    failure_title = "Video Show Download Failure!"
+                    failure_message = f"Failed to download video show '{record['title']}' with ID {show_id}. Exit code: {exit_code}."
+                    send_pushover_notification(failure_message, failure_title)
+
+        video_digest_message = "\n".join([record['artist']['name'] + ' - ' + record['title'] for record in new_video_records])
+        video_alert_msg_title = f"New video content available on nugs.net!"
+        if PUSHOVER_TOKEN:
+            logging.info(f"Found {len(new_video_records)} new video records. Sending notification...")
+            send_pushover_notification(video_digest_message, video_alert_msg_title)
+        else:
+            logging.info(f"Found {len(new_video_records)} new video records. Pushover credentials not defined so no notification was sent...")
+        
+        store_ids(latest_video_ids, VIDEO_FILENAME)
+    else:
+        logging.info("No new video records found.")
 
 if __name__ == "__main__":
     main()
