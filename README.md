@@ -9,7 +9,8 @@ This Docker container checks for new content on nugs.net and downloads it if any
 - **PUSHOVER_APP_TOKEN**: Your Pushover application token for notifications.
 - **PUSHOVER_USER_KEY**: Your Pushover user key for notifications.
 - **CHECKTIME**: Number of minutes the application should wait before checking for updates again. If not set, the application will only run once.
-- **DOWNLOAD_SHOW**: If set to 'true', the script will attempt to download new shows using the /app/Nugs-DL tool.
+- **DOWNLOAD_AUDIO**: If set to 'true', the script will attempt to download new shows using the /app/Nugs-DL tool.
+- **DOWNLOAD_VIDEO**: If set to 'true', the script will attempt to download new shows using the /app/Nugs-DL tool.
 - **NUGS_EMAIL**: Your nugs.net email.
 - **NUGS_PASSWORD**: Your nugs.net password.
 - **NUGS_FORMAT**: The audio format you prefer to download (default is 4).
