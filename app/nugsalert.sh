@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set UMASK to 002 to ensure files are editable by any user in the group
+umask 002
+
 # Define default user and group IDs
 APP_USER_ID=${PUID:-}
 APP_GROUP_ID=${PGID:-}
