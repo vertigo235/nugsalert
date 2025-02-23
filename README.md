@@ -30,13 +30,13 @@ This Docker container checks for new content on nugs.net and downloads it if any
 
 To build the Docker image, navigate to the directory containing the Dockerfile and execute:
 
-```
+```bash
 docker build -t nugsalert .
 ```
 
 To run the Docker container:
 
-```
+```bash
 docker run --rm -it \
   -v /path/on/host/downloads:/downloads:rw \
   -v /path/on/host/data:/data:rw \
@@ -52,8 +52,10 @@ docker run --rm -it \
 Replace `/path/on/host/` with your desired directory on the host system.
 
 ## Docker Image
+
 You can also pull the Docker image for this project directly from Docker Hub:
-```
+
+```bash
 docker pull docker.io/vertigo235/nugsalert
 ```
 
@@ -94,5 +96,28 @@ docker-compose up -d
 
 Remember to replace placeholder values like `your_email@example.com` with your actual data. If your password or any other values have special characters, ensure they're enclosed in single quotes for proper parsing.
 
+## Troubleshooting
+
+### Common Issues
+
+- **Network Errors**: Ensure that the container has network access and can reach nugs.net.
+- **Authentication Failures**: Verify that `NUGS_EMAIL` and `NUGS_PASSWORD` are correct.
+- **Permission Denied**: Check that the user running the container has the necessary permissions to write to the specified directories.
+
+### Solutions
+
+- **Network Errors**: Use `docker run --network host` to allow the container to use the host's network stack.
+- **Authentication Failures**: Double-check your credentials and ensure they are not expired.
+- **Permission Denied**: Ensure that the user running the container has the correct permissions. You can adjust the `PUID` and `PGID` environment variables accordingly.
+
+## Contributing
+
+We welcome contributions to improve this project! Here's how you can get involved:
+
+1. **Fork the Repository**: Create a fork of this repository on GitHub.
+2. **Create a Branch**: Make your changes in a new branch.
+3. **Submit a Pull Request**: Open a pull request with a description of your changes.
+
 ## Credits
+
 This docker uses the [Nugs-Downloader](https://github.com/Sorrow446/Nugs-Downloader) project by [Sorrow446](https://github.com/Sorrow446). A huge thanks to them for their contribution to the community!
