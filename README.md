@@ -4,13 +4,20 @@ This Docker container checks for new content on nugs.net and downloads it if any
 
 ## Environment Variables
 
-- **ARTIST_ID**: The ID of the artist you want to check for new content. (e.g. '196') can also be a string of artists (e.g. '196,128')
+- **ARTIST_ID**: The ID of the artist you want to check for new content. (e.g., '196') can also be a string of artists (e.g., '196,128').
 - **FILE_PATH**: Path where the known IDs file will be stored. (Default is '/data/')
 - **PUSHOVER_APP_TOKEN**: Your Pushover application token for notifications.
 - **PUSHOVER_USER_KEY**: Your Pushover user key for notifications.
 - **CHECKTIME**: Number of minutes the application should wait before checking for updates again. If not set, the application will only run once.
 - **DOWNLOAD_AUDIO**: If set to 'true', the script will attempt to download new shows using the /app/Nugs-DL tool.
 - **DOWNLOAD_VIDEO**: If set to 'true', the script will attempt to download new shows using the /app/Nugs-DL tool.
+- **LIMIT**: The maximum number of shows to load from the RSS feed. (Default is 50)
+- **AUDIO_URL_TEMPLATE**: Template URL for fetching audio data. (Default is constructed from `LIMIT` and `ARTIST_ID`)
+- **VIDEO_URL_TEMPLATE**: Template URL for fetching video data. (Default is constructed from `LIMIT` and `ARTIST_ID`)
+- **AUDIO_FILENAME**: Filename where known audio IDs are stored. (Default is 'known_ids.json' in `FILE_PATH`)
+- **VIDEO_FILENAME**: Filename where known video IDs are stored. (Default is 'known_video_ids.json' in `FILE_PATH`)
+- **DOWNLOAD_AUDIO_PATH**: Path where downloaded audio content will be stored. (Default is '/downloads/audio')
+- **VIDEO_DOWNLOAD_PATH**: Path where downloaded video content will be stored. (Default is '/downloads/video')
 - **NUGS_EMAIL**: Your nugs.net email.
 - **NUGS_PASSWORD**: Your nugs.net password.
 - **NUGS_FORMAT**: The audio format you prefer to download (default is 4).
@@ -89,4 +96,3 @@ Remember to replace placeholder values like `your_email@example.com` with your a
 
 ## Credits
 This docker uses the [Nugs-Downloader](https://github.com/Sorrow446/Nugs-Downloader) project by [Sorrow446](https://github.com/Sorrow446). A huge thanks to them for their contribution to the community!
-
